@@ -126,23 +126,28 @@ export default function Portfolio() {
       camera.lookAt(cameraTarget.current)
 
       // Animate pixels
-      pixels.children.forEach((pixel: THREE.Mesh) => {
-        pixel.position.add(pixel.userData.velocity)
+      pixels.children.forEach((child) => {
+        if (child instanceof THREE.Mesh) {
+          const pixel = child as THREE.Mesh
+          const velocity = pixel.userData.velocity as THREE.Vector3
 
-        // Bounce off boundaries
-        if (Math.abs(pixel.position.x) > 20) pixel.userData.velocity.x *= -1
-        if (Math.abs(pixel.position.y) > 20) pixel.userData.velocity.y *= -1
-        if (Math.abs(pixel.position.z) > 20) pixel.userData.velocity.z *= -1
+          pixel.position.add(velocity)
 
-        // React to cursor
-        const distanceToMouse = new THREE.Vector2(pixel.position.x, pixel.position.y).distanceTo(mousePosition.current.multiplyScalar(20))
-        if (distanceToMouse < 8) {
-          const repelForce = new THREE.Vector3(
-            pixel.position.x - mousePosition.current.x * 20,
-            pixel.position.y + mousePosition.current.y * 20,
-            0
-          ).normalize().multiplyScalar(0.3)
-          pixel.position.add(repelForce)
+          // Bounce off boundaries
+          if (Math.abs(pixel.position.x) > 20) velocity.x *= -1
+          if (Math.abs(pixel.position.y) > 20) velocity.y *= -1
+          if (Math.abs(pixel.position.z) > 20) velocity.z *= -1
+
+          // React to cursor
+          const distanceToMouse = new THREE.Vector2(pixel.position.x, pixel.position.y).distanceTo(mousePosition.current.clone().multiplyScalar(20))
+          if (distanceToMouse < 8) {
+            const repelForce = new THREE.Vector3(
+              pixel.position.x - mousePosition.current.x * 20,
+              pixel.position.y + mousePosition.current.y * 20,
+              0
+            ).normalize().multiplyScalar(0.3)
+            pixel.position.add(repelForce)
+          }
         }
       })
 
